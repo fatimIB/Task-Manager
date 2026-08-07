@@ -407,6 +407,8 @@ The corresponding database row is updated.
 
 **Screenshot:**
 
+![DB update](screenshots/db-upd.png)
+
 
 
 ### Delete

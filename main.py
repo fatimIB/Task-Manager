@@ -116,34 +116,54 @@ def add_task(task: TaskCreate):
         "title": task.title,
         "done": False
     }
-
 @app.put("/tasks/{id}")
-def update(id: int, task_update : TaskUpdate):
-    for task in memory :
-        if task["id"]==id :
-            if task_update.title is None and task_update.done is None:
-                return JSONResponse(
-                    status_code=400,
-                    content={"error": "No fields to update"}
-                )
+def update_task(id: int, task: TaskUpdate):
 
-            if task_update.title is not None:
-                if not task_update.title.strip():
-                    return JSONResponse(
-                        status_code=400,
-                        content={"error": "Title is required"}
-                    )
+    if task.title is None and task.done is None:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "No fields to update"}
+        )
 
-                task["title"] = task_update.title
+    if task.title is not None and not task.title.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Title is required"}
+        )
 
-            if task_update.done is not None:
-                task["done"] = task_update.done
+    connection = db.get_connection()
 
-            return task
-    return JSONResponse(
-        status_code=404,
-        content={"error": f"Task {id} not found"}
+    existing_task = connection.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    if existing_task is None:
+        connection.close()
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {id} not found"}
+        )
+
+    new_title = task.title if task.title is not None else existing_task["title"]
+    new_done = task.done if task.done is not None else existing_task["done"]
+
+    connection.execute(
+        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+        (new_title, new_done, id)
     )
+
+    connection.commit()
+
+    updated_task = {
+        "id": id,
+        "title": new_title,
+        "done": new_done
+    }
+
+    connection.close()
+
+    return updated_task
 
 @app.delete("/tasks/{id}", status_code=204)
 def delete_task(id: int):
