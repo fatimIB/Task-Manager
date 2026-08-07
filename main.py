@@ -91,20 +91,31 @@ def get_task_by_id(id: int):
 
 @app.post("/tasks", status_code=201)
 def add_task(task: TaskCreate):
-    
+
     if task.title is None or task.title.strip() == "":
         return JSONResponse(
             status_code=400,
             content={"error": "Title is required"}
         )
-    new_id = max(task["id"] for task in memory) + 1
-    new_task = {
+
+    connection = db.get_connection()
+
+    cursor = connection.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (task.title, False)
+    )
+
+    connection.commit()
+
+    new_id = cursor.lastrowid
+
+    connection.close()
+
+    return {
         "id": new_id,
         "title": task.title,
         "done": False
     }
-    memory.append(new_task)
-    return new_task
 
 @app.put("/tasks/{id}")
 def update(id: int, task_update : TaskUpdate):

@@ -395,7 +395,7 @@ The new task is inserted into the SQLite database.
 
 **Screenshot:**
 
-
+![DB add](screenshots/db-add.png)
 
 ### Update
 
