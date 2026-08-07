@@ -187,6 +187,16 @@ Returns `204 No Content`.
 
 ![DELETE task](screenshots/curl-delete-task.png)
 
+### Task not found
+
+```bash
+curl.exe -i -X DELETE "http://localhost:8000/tasks/44"
+```
+
+Returns `404 Not Found`.
+
+![DELETE task not found](screenshots/curl-delete-notfound.png)
+
 ---
 
 # 📚 Swagger UI Testing
