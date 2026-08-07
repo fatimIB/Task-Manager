@@ -42,8 +42,11 @@ def health():
 
 
 @app.get("/tasks")
-def get_tasks():
-    return memory
+def get_tasks(done: bool | None = None):
+    if done is None:
+        return memory
+
+    return [task for task in memory if task["done"] == done]
 
 @app.get("/tasks/{id}")
 def get_tasks_by_id(id: int):
