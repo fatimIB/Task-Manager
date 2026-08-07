@@ -457,14 +457,9 @@ This proves that the data is no longer stored only in application memory.
 # 🗃️ SQLite Database
 
 The database was opened using **DB Browser for SQLite** to inspect the `tasks` table and its data.
-
-**Database screenshot:**
-
-
-
 ---
 
-# 🔎 SQL Queries
+## 🔎 SQL Queries
 
 SQL queries were also executed directly against the database.
 
@@ -474,11 +469,15 @@ SQL queries were also executed directly against the database.
 SELECT * FROM tasks;
 ```
 
+![DB browser](screenshots/db-bros-tasks.png)
+
 ### Show completed tasks
 
 ```sql
 SELECT * FROM tasks WHERE done = 1;
 ```
+![DB browser](screenshots/db-com-tsks.png)
+
 
 ### Count tasks
 
@@ -486,8 +485,23 @@ SELECT * FROM tasks WHERE done = 1;
 SELECT COUNT(*) FROM tasks;
 ```
 
-**SQL query screenshot:**
+![DB browser](screenshots/db-counts.png)
 
+### Mark as complete
+
+```sql
+UPDATE tasks SET done = 1;
+```
+
+![DB browser](screenshots/db-ascomp.png)
+
+### Count tasks
+
+```sql
+DELETE FROM tasks WHERE done = 1;    
+```
+
+![DB browser](screenshots/db-delall.png)
 
 
 ---
