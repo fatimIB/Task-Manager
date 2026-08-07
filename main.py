@@ -5,23 +5,6 @@ import db
 
 app = FastAPI()
 
-memory=[
-    {
-        "id": 1,
-        "title": "Task nbr1",
-        "done": True
-    },
-    {
-        "id": 2,
-        "title": "Task nbr2",
-        "done": False
-    },
-    {
-        "id": 3,
-        "title": "Task nbr3",
-        "done": False
-    }
-]
 
 
 class TaskCreate(BaseModel):
@@ -116,6 +99,7 @@ def add_task(task: TaskCreate):
         "title": task.title,
         "done": False
     }
+
 @app.put("/tasks/{id}")
 def update_task(id: int, task: TaskUpdate):
 
