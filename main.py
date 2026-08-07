@@ -168,12 +168,26 @@ def update_task(id: int, task: TaskUpdate):
 @app.delete("/tasks/{id}", status_code=204)
 def delete_task(id: int):
 
-    for i, task in enumerate(memory):
-        if task["id"] == id:
-            memory.pop(i)
-            return
+    connection = db.get_connection()
 
-    return JSONResponse(
-        status_code=404,
-        content={"error": f"Task {id} not found"}
+    existing_task = connection.execute(
+        "SELECT * FROM tasks WHERE id = ?",
+        (id,)
+    ).fetchone()
+
+    if existing_task is None:
+        connection.close()
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {id} not found"}
+        )
+
+    connection.execute(
+        "DELETE FROM tasks WHERE id = ?",
+        (id,)
     )
+
+    connection.commit()
+    connection.close()
+
+    return

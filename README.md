@@ -421,6 +421,7 @@ The corresponding database row is deleted.
 
 **Screenshot:**
 
+![DB update](screenshots/db-delete.png)
 
 
 ---
