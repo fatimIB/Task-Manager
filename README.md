@@ -701,3 +701,68 @@ The database contains the three initial tasks.
 
 ![Postges](screenshots/post-ins.png)
 
+
+### 10. Read from PostgreSQL — Stage 2
+
+The `GET` endpoints were updated to read directly from the PostgreSQL database running in Docker.
+
+The API routes themselves remain unchanged from A2. Only the database query was adapted from SQLite to PostgreSQL.
+
+#### Get All Tasks
+
+The `/tasks` endpoint reads all tasks from PostgreSQL using:
+
+```sql
+SELECT id, title, done FROM tasks;
+```
+
+Tested with:
+
+```cmd
+curl -i http://localhost:8000/tasks
+```
+
+Result:
+
+```text
+HTTP/1.1 200 OK
+```
+
+The response contains the three tasks stored in PostgreSQL.
+
+
+#### Get a Task by ID
+
+The `/tasks/{id}` endpoint uses a parameterized PostgreSQL query:
+
+```sql
+SELECT id, title, done
+FROM tasks
+WHERE id = %s;
+```
+
+The `%s` placeholder is used by `psycopg`. The ID is passed separately as a parameter instead of being directly inserted into the SQL query.
+
+Tested with a non-existing task:
+
+```cmd
+curl -i http://localhost:8000/tasks/999
+```
+
+Result:
+
+```text
+HTTP/1.1 404 Not Found
+```
+
+Response:
+
+```json
+{"error":"Task 999 not found"}
+```
+
+This confirms that unknown task IDs still return the expected `404` response.
+
+**Screenshots:**
+
+![Postges](screenshots/curl-task-postges.png)

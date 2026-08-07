@@ -28,7 +28,8 @@ def health():
 def get_tasks():
     connection = db.get_connection()
 
-    cursor = connection.execute(
+    cursor = connection.cursor()
+    cursor.execute(
         "SELECT id, title, done FROM tasks"
     )
 
@@ -50,9 +51,10 @@ def get_tasks():
 @app.get("/tasks/{id}")
 def get_task_by_id(id: int):
     connection = db.get_connection()
+    cursor = connection.cursor()
 
-    cursor = connection.execute(
-        "SELECT id, title, done FROM tasks WHERE id = ?",
+    cursor.execute(
+        "SELECT id, title, done FROM tasks WHERE id = %s",
         (id,)
     )
 
