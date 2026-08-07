@@ -26,6 +26,9 @@ memory=[
 
 class TaskCreate(BaseModel):
     title: str | None = None
+class TaskUpdate(BaseModel):
+    title: str | None = None
+    done: bool | None = None
 
 
 @app.get("/")
@@ -61,7 +64,7 @@ def add_task(task: TaskCreate):
             status_code=400,
             content={"error": "Title is required"}
         )
-    new_id = len(memory) + 1
+    new_id = max(task["id"] for task in memory) + 1
     new_task = {
         "id": new_id,
         "title": task.title,
@@ -69,3 +72,44 @@ def add_task(task: TaskCreate):
     }
     memory.append(new_task)
     return new_task
+
+@app.put("/tasks/{id}")
+def update(id: int, task_update : TaskUpdate):
+    for task in memory :
+        if task["id"]==id :
+            if task_update.title is None and task_update.done is None:
+                return JSONResponse(
+                    status_code=400,
+                    content={"error": "No fields to update"}
+                )
+
+            if task_update.title is not None:
+                if not task_update.title.strip():
+                    return JSONResponse(
+                        status_code=400,
+                        content={"error": "Title is required"}
+                    )
+
+                task["title"] = task_update.title
+
+            if task_update.done is not None:
+                task["done"] = task_update.done
+
+            return task
+    return JSONResponse(
+        status_code=404,
+        content={"error": f"Task {id} not found"}
+    )
+
+@app.delete("/tasks/{id}", status_code=204)
+def delete_task(id: int):
+
+    for i, task in enumerate(memory):
+        if task["id"] == id:
+            memory.pop(i)
+            return
+
+    return JSONResponse(
+        status_code=404,
+        content={"error": f"Task {id} not found"}
+    )
