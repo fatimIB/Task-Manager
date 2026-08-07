@@ -896,7 +896,7 @@ docker compose ps
 Get all tasks:
 
 ```cmd
-curl -i http://localhost:3000/tasks
+curl -i http://localhost:8000/tasks
 ```
 
 Expected: `200 OK`
@@ -905,3 +905,10 @@ Expected: `200 OK`
 
 ![docker](screenshots/docker-curl.png)
 
+To stop the complete Docker Compose stack, including both the API and PostgreSQL containers, use:
+
+```cmd
+docker compose down
+```
+
+This stops and removes the Compose containers and network while keeping the named `taskdata` volume, so the PostgreSQL data is preserved for the next `docker compose up`.
