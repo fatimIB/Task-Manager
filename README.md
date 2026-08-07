@@ -867,3 +867,41 @@ The complete CRUD cycle now works against PostgreSQL:
 | Verify missing task | `GET /tasks/{id}` | `404 Not Found` |
 
 The application is now performing its full CRUD operations against a real PostgreSQL database running inside Docker.
+
+### 12. Run the Full Stack with Docker Compose
+
+The API and PostgreSQL database can now be started together with:
+
+```cmd
+docker compose up
+```
+
+**Screenshot:**
+
+![docker](screenshots/docker-up.png)
+
+
+Check that both containers are running:
+
+```cmd
+docker compose ps
+```
+
+**Screenshot:**
+
+![docker](screenshots/dockerps.png)
+
+### 13. Test the API
+
+Get all tasks:
+
+```cmd
+curl -i http://localhost:3000/tasks
+```
+
+Expected: `200 OK`
+
+**Screenshot:**
+
+![docker](screenshots/docker-curl.png)
+
