@@ -84,22 +84,22 @@ def add_task(task: TaskCreate):
         )
 
     connection = db.get_connection()
+    cursor = connection.cursor()
 
-    cursor = connection.execute(
-        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING *",
         (task.title, False)
     )
 
+    row = cursor.fetchone()
+
     connection.commit()
-
-    new_id = cursor.lastrowid
-
     connection.close()
 
     return {
-        "id": new_id,
-        "title": task.title,
-        "done": False
+        "id": row[0],
+        "title": row[1],
+        "done": bool(row[2])
     }
 
 @app.put("/tasks/{id}")
@@ -118,11 +118,14 @@ def update_task(id: int, task: TaskUpdate):
         )
 
     connection = db.get_connection()
+    cursor = connection.cursor()
 
-    existing_task = connection.execute(
-        "SELECT * FROM tasks WHERE id = ?",
+    cursor.execute(
+        "SELECT id, title, done FROM tasks WHERE id = %s",
         (id,)
-    ).fetchone()
+    )
+
+    existing_task = cursor.fetchone()
 
     if existing_task is None:
         connection.close()
@@ -131,35 +134,42 @@ def update_task(id: int, task: TaskUpdate):
             content={"error": f"Task {id} not found"}
         )
 
-    new_title = task.title if task.title is not None else existing_task["title"]
-    new_done = task.done if task.done is not None else existing_task["done"]
+    new_title = task.title if task.title is not None else existing_task[1]
+    new_done = task.done if task.done is not None else existing_task[2]
 
-    connection.execute(
-        "UPDATE tasks SET title = ?, done = ? WHERE id = ?",
+    cursor.execute(
+        """
+        UPDATE tasks
+        SET title = %s, done = %s
+        WHERE id = %s
+        RETURNING *
+        """,
         (new_title, new_done, id)
     )
 
+    row = cursor.fetchone()
+
     connection.commit()
-
-    updated_task = {
-        "id": id,
-        "title": new_title,
-        "done": new_done
-    }
-
     connection.close()
 
-    return updated_task
+    return {
+        "id": row[0],
+        "title": row[1],
+        "done": bool(row[2])
+    }
 
 @app.delete("/tasks/{id}", status_code=204)
 def delete_task(id: int):
 
     connection = db.get_connection()
+    cursor = connection.cursor()
 
-    existing_task = connection.execute(
-        "SELECT * FROM tasks WHERE id = ?",
+    cursor.execute(
+        "SELECT id FROM tasks WHERE id = %s",
         (id,)
-    ).fetchone()
+    )
+
+    existing_task = cursor.fetchone()
 
     if existing_task is None:
         connection.close()
@@ -168,8 +178,8 @@ def delete_task(id: int):
             content={"error": f"Task {id} not found"}
         )
 
-    connection.execute(
-        "DELETE FROM tasks WHERE id = ?",
+    cursor.execute(
+        "DELETE FROM tasks WHERE id = %s",
         (id,)
     )
 

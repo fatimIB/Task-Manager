@@ -702,7 +702,7 @@ The database contains the three initial tasks.
 ![Postges](screenshots/post-ins.png)
 
 
-### 10. Read from PostgreSQL — Stage 2
+### 10. Read from PostgreSQL
 
 The `GET` endpoints were updated to read directly from the PostgreSQL database running in Docker.
 
@@ -766,3 +766,104 @@ This confirms that unknown task IDs still return the expected `404` response.
 **Screenshots:**
 
 ![Postges](screenshots/curl-task-postges.png)
+
+
+### 11. Full CRUD on PostgreSQL — Stage 3
+
+The remaining CRUD operations were migrated from SQLite to PostgreSQL.
+
+The API behavior and routes remain the same as in A2. The database operations now use `psycopg` and PostgreSQL parameterized queries.
+
+### Create a Task
+
+A new task is created using `POST /tasks`.
+
+The PostgreSQL query uses `%s` placeholders and `RETURNING *` to return the newly created row:
+
+```sql
+INSERT INTO tasks (title, done)
+VALUES (%s, %s)
+RETURNING *;
+```
+
+Tested with:
+
+```cmd
+curl -i -X POST http://localhost:8000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Stage 3 task\"}"
+```
+
+Expected result:
+
+```text
+HTTP/1.1 201 Created
+```
+
+**Screenshot:**
+
+![Postges](screenshots/add-postges.png)
+
+
+### Update a Task
+
+The task was updated using `PUT /tasks/{id}`.
+
+The PostgreSQL query uses parameterized values:
+
+```sql
+UPDATE tasks
+SET title = %s, done = %s
+WHERE id = %s;
+```
+
+For example, for task `4`:
+
+```cmd
+curl -i -X PUT http://localhost:8000/tasks/4 -H "Content-Type: application/json" -d "{\"done\":true}"
+```
+
+Expected result:
+
+```text
+HTTP/1.1 200 OK
+```
+
+The response confirms that the task was marked as completed.
+
+**Screenshot:**
+
+![Postges](screenshots/post-upd.png)
+
+
+### Delete a Task
+
+The task was deleted using `DELETE /tasks/{id}`:
+
+```cmd
+curl -i -X DELETE http://localhost:8000/tasks/4
+```
+
+Expected result:
+
+```text
+HTTP/1.1 204 No Content
+```
+
+A successful deletion returns an empty response body.
+
+**Screenshot:**
+
+![Postges](screenshots/postg-delet.png)
+
+### Stage 3 Checkpoint
+
+The complete CRUD cycle now works against PostgreSQL:
+
+| Operation | Endpoint | Result |
+|---|---|---|
+| Create | `POST /tasks` | `201 Created` |
+| Read | `GET /tasks` | `200 OK` |
+| Update | `PUT /tasks/{id}` | `200 OK` |
+| Delete | `DELETE /tasks/{id}` | `204 No Content` |
+| Verify missing task | `GET /tasks/{id}` | `404 Not Found` |
+
+The application is now performing its full CRUD operations against a real PostgreSQL database running inside Docker.
