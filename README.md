@@ -547,3 +547,66 @@ This helps prevent SQL injection and keeps database queries safe.
 **Connecting your CRUD to the database**
 
 The original A1 CRUD API was migrated from in-memory storage to SQLite while keeping the same API endpoints and behavior.
+
+
+# Week 3 — Assignment A3: Containerize Your Stack
+
+**FlyRank Internship · Backend Track · Week 3 · Assignment A3**
+
+In A2, the API used SQLite, where the database was stored in a local `tasks.db` file.
+
+In A3, the storage is being migrated to **PostgreSQL running inside Docker**. The database uses a Docker volume so that its data can persist independently from the container.
+
+### 1. Verify Docker
+
+```cmd
+docker --version
+```
+
+**Screenshot:**
+
+![verify docker](screenshots/verif-docker.png)
+
+
+### 2. Start PostgreSQL in Docker
+
+```cmd
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql -d postgres
+```
+
+This starts PostgreSQL with:
+
+- Database: `tasks`
+- Container: `taskdb`
+- Port: `5432`
+- Persistent volume: `taskdata`
+
+> The assignment uses `/var/lib/postgresql/data`, but the current PostgreSQL 18+ Docker image requires `/var/lib/postgresql`.
+
+**Screenshot:**
+
+![Postges](screenshots/postg.png)
+
+
+### 3. Check the Running Container
+
+```cmd
+docker ps
+```
+
+**Screenshot:**
+![Postges run](screenshots/post-run.png)
+
+
+
+### 4. Connect to the Database
+
+```cmd
+docker exec -it taskdb psql -U postgres -d tasks
+```
+
+**Screenshot:**
+
+![Postges run](screenshots/postg-connect.png)
+
+
