@@ -495,7 +495,7 @@ UPDATE tasks SET done = 1;
 
 ![DB browser](screenshots/db-ascomp.png)
 
-### Count tasks
+### Delete completed tasks
 
 ```sql
 DELETE FROM tasks WHERE done = 1;    
