@@ -610,3 +610,94 @@ docker exec -it taskdb psql -U postgres -d tasks
 ![Postges run](screenshots/postg-connect.png)
 
 
+### 5. Install the PostgreSQL Driver
+
+The Python PostgreSQL driver and environment-variable loader were installed:
+
+```cmd
+pip install "psycopg[binary]" python-dotenv
+```
+
+### 6. Configure the Database Connection
+
+A `.env` file was created to store the PostgreSQL connection string:
+
+```env
+DATABASE_URL=postgresql://postgres:dev@localhost:5432/tasks
+```
+
+The `.env` file is ignored by Git so that the database credentials are not committed.
+
+A `.env.example` file was also created with a placeholder password:
+
+```env
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/tasks
+```
+
+### 7. Connect the Application to PostgreSQL
+
+The database module was changed from SQLite to PostgreSQL using `psycopg`.
+
+The application now reads the `DATABASE_URL` from `.env` and connects to the PostgreSQL container.
+
+The `tasks` table is created automatically if it does not already exist.
+
+```text
+A2:
+FastAPI → SQLite → tasks.db
+
+A3:
+FastAPI → PostgreSQL → Docker
+```
+
+
+### 8. Start the FastAPI Application
+
+The API was started with:
+
+```cmd
+uvicorn main:app --reload
+```
+
+The application successfully starts and connects to the PostgreSQL database.
+
+```cmd
+PS C:\Users\hp\Desktop\FlyRank assignment\Task Manager> uvicorn main:app --reload
+INFO:     Will watch for changes in these directories: ['C:\\Users\\hp\\Desktop\\FlyRank assignment\\Task Manager']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [17932] using WatchFiles
+INFO:     Started server process [34080]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+### 9. Check the Database Table
+
+The PostgreSQL database was opened from inside the Docker container:
+
+```cmd
+docker exec -it taskdb psql -U postgres -d tasks
+```
+
+Then the tables were checked with:
+
+```sql
+\dt
+```
+
+The `tasks` table is created automatically by the application.
+
+The application inserts three example tasks when the `tasks` table is empty.
+
+They can be checked directly from PostgreSQL:
+
+```cmd
+docker exec -it taskdb psql -U postgres -d tasks -c "SELECT * FROM tasks;"
+```
+
+The database contains the three initial tasks.
+
+**Screenshot:**
+
+![Postges](screenshots/post-ins.png)
+
