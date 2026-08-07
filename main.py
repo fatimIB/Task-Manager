@@ -5,7 +5,6 @@ import db
 
 app = FastAPI()
 
-
 memory=[
     {
         "id": 1,
@@ -43,22 +42,52 @@ def health():
 
 
 @app.get("/tasks")
-def get_tasks(done: bool | None = None):
-    if done is None:
-        return memory
+def get_tasks():
+    connection = db.get_connection()
 
-    return [task for task in memory if task["done"] == done]
+    cursor = connection.execute(
+        "SELECT id, title, done FROM tasks"
+    )
+
+    rows = cursor.fetchall()
+
+    connection.close()
+
+    tasks = []
+
+    for row in rows:
+        tasks.append({
+            "id": row[0],
+            "title": row[1],
+            "done": bool(row[2])
+        })
+
+    return tasks
 
 @app.get("/tasks/{id}")
-def get_tasks_by_id(id: int):
-    for task in memory :
-        if task["id"]==id :
-            return task
+def get_task_by_id(id: int):
+    connection = db.get_connection()
 
-    return JSONResponse(
-        status_code=404,
-        content={"error": f"Task {id} not found"}
+    cursor = connection.execute(
+        "SELECT id, title, done FROM tasks WHERE id = ?",
+        (id,)
     )
+
+    row = cursor.fetchone()
+
+    connection.close()
+
+    if row is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {id} not found"}
+        )
+
+    return {
+        "id": row[0],
+        "title": row[1],
+        "done": bool(row[2])
+    }
 
 @app.post("/tasks", status_code=201)
 def add_task(task: TaskCreate):

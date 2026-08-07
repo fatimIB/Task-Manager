@@ -270,10 +270,263 @@ No database is used in this assignment.
 - cURL
 - Git & GitHub
 
+
+---
+
+# 🗄️ Week 3 — SQLite Database
+
+This version extends the CRUD API from Assignment A1 by replacing the in-memory task list with a **SQLite database**.
+
+The API endpoints and request/response behavior remain the same. The main change is the storage layer:
+
+```text
+A1:
+Client → FastAPI → In-memory list
+
+A2:
+Client → FastAPI → SQLite database
+```
+
+Tasks are now stored in `tasks.db`, so they **persist when the server restarts**.
+
+---
+
+## 🛠️ Additional Technology
+
+- SQLite
+- Python `sqlite3`
+
+SQLite is built into Python, so no additional database server or installation is required.
+
+---
+
+## 💾 Database
+
+The application automatically creates:
+
+```text
+tasks.db
+```
+
+if the database file does not already exist.
+
+It also automatically creates the `tasks` table:
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | INTEGER | Primary key |
+| `title` | TEXT | Task title |
+| `done` | BOOLEAN | Completion status |
+
+The application inserts the three example tasks **only if the table is empty**, preventing duplicate seed data when the server restarts.
+
+---
+
+## 📁 Updated Project Structure
+
+```text
+Task-Manager/
+│
+├── main.py
+├── db.py
+├── tasks.db
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── screenshots/
+```
+
+> `tasks.db` is created automatically when the application runs.
+
+---
+
+## 🔄 What Changed from A1?
+
+The API itself did not change.
+
+The same endpoints are still available:
+
+```text
+GET    /tasks
+GET    /tasks/{id}
+POST   /tasks
+PUT    /tasks/{id}
+DELETE /tasks/{id}
+```
+
+The difference is where the data is stored.
+
+| A1 | A2 |
+|---|---|
+| Python list | SQLite database |
+| Data stored in memory | Data stored in `tasks.db` |
+| Data lost after restart | Data survives restart |
+| Python operations | SQL queries |
+
+This demonstrates the separation between the **API layer** and the **storage layer**.
+
+---
+
+# 🧪 Database CRUD
+
+The existing cURL tests from A1 were reused to verify that the API still behaves the same with SQLite.
+
+### Read
+
+```bash
+curl.exe -i "http://localhost:8000/tasks"
+```
+
+Returns the tasks stored in the database.
+
+**Screenshot:**
+
+![DB Tasks](screenshots/db-tasks.png)
+
+
+
+### Create
+
+```bash
+curl.exe -i -X POST "http://localhost:8000/tasks" -H "Content-Type: application/json" -d "{\"title\":\"Buy milk\"}"
+```
+
+The new task is inserted into the SQLite database.
+
+**Screenshot:**
+
+
+
+### Update
+
+```bash
+curl.exe -i -X PUT "http://localhost:8000/tasks/2" -H "Content-Type: application/json" -d "{\"title\":\"Task nbr2\",\"done\":true}"
+```
+
+The corresponding database row is updated.
+
+**Screenshot:**
+
+
+
+### Delete
+
+```bash
+curl.exe -i -X DELETE "http://localhost:8000/tasks/2"
+```
+
+The corresponding database row is deleted.
+
+**Screenshot:**
+
+
+
+---
+
+# 🔁 Persistence Test
+
+The main improvement over A1 is **persistence**.
+
+A task can be created:
+
+```text
+POST /tasks
+      ↓
+Task saved in tasks.db
+      ↓
+Server stopped
+      ↓
+Server restarted
+      ↓
+GET /tasks
+      ↓
+Task still exists
+```
+
+This proves that the data is no longer stored only in application memory.
+
+**Persistence test screenshot:**
+
+
+
+---
+
+# 🗃️ SQLite Database
+
+The database was opened using **DB Browser for SQLite** to inspect the `tasks` table and its data.
+
+**Database screenshot:**
+
+
+
+---
+
+# 🔎 SQL Queries
+
+SQL queries were also executed directly against the database.
+
+### List all tasks
+
+```sql
+SELECT * FROM tasks;
+```
+
+### Show completed tasks
+
+```sql
+SELECT * FROM tasks WHERE done = 1;
+```
+
+### Count tasks
+
+```sql
+SELECT COUNT(*) FROM tasks;
+```
+
+**SQL query screenshot:**
+
+
+
+---
+
+# 🔐 Parameterized Queries
+
+Database operations use **parameterized SQL queries** instead of inserting user input directly into SQL strings.
+
+For example:
+
+```python
+cursor.execute(
+    "SELECT * FROM tasks WHERE id = ?",
+    (id,)
+)
+```
+
+The `?` is a parameter placeholder, and the value is supplied separately.
+
+This helps prevent SQL injection and keeps database queries safe.
+
+---
+
+# 📚 What I Practiced in A2
+
+- SQLite
+- SQL queries
+- Database tables and rows
+- Primary keys
+- Database persistence
+- Parameterized queries
+- Database-backed CRUD
+- `sqlite3`
+- DB Browser for SQLite
+- Separating API and storage layers
+
 ---
 
 ## 📌 Assignment
 
-**FlyRank Internship — Backend Track — Week 2 — Assignment A1**
+**FlyRank Internship — Backend Track — Week 3 — Assignment A2**
 
-**Build Your First CRUD API**
+**Connecting your CRUD to the database**
+
+The original A1 CRUD API was migrated from in-memory storage to SQLite while keeping the same API endpoints and behavior.
